@@ -17,6 +17,6 @@ setup(name="hexgrid",
       classifiers=[],
       license="GPLv3",
 
-      py_modules=["undoredo"],
+      py_modules=["hexgrid"],
 	)
 
