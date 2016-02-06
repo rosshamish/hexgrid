@@ -22,7 +22,7 @@ See individual methods for usage.
 import logging
 
 __author__ = "Ross Anderson <ross.anderson@ualberta.ca>"
-__version__ = "0.1.1"
+__version__ = "0.2.1"
 
 
 EDGE = 0
@@ -97,6 +97,27 @@ def location(hexgrid_type, coord):
         return None
 
 
+def from_location(hexgrid_type, tile_id, direction=None):
+    """
+
+    :param hexgrid_type: hexgrid.TILE, hexgrid.NODE, hexgrid.EDGE
+    :param tile_id: tile identifier, int
+    :param direction: str
+    :return: integer coordinate in this module's hexadecimal coordinate system
+    """
+    if hexgrid_type == TILE:
+        if direction is not None:
+            raise ValueError('tiles do not have a direction')
+        return tile_id_to_coord(tile_id)
+    elif hexgrid_type == NODE:
+        return node_coord_in_direction(tile_id, direction)
+    elif hexgrid_type == EDGE:
+        return edge_coord_in_direction(tile_id, direction)
+    else:
+        logging.warning('unsupported hexgrid_type={}'.format(hexgrid_type))
+        return None
+
+
 def coastal_tile_ids():
     """
     Returns a list of tile identifiers which lie on the border of the grid.
@@ -110,7 +131,6 @@ def coastal_coords():
 
     An edge is coastal if it is on the grid's border.
 
-    :param tile_id:
     :return: list( (tile_id, direction) )
     """
     coast = list()
@@ -129,7 +149,6 @@ def coastal_edges(tile_id):
     Returns a list of coastal edge coordinate.
 
     An edge is coastal if it is on the grid's border.
-    :param tile_id:
     :return: list(int)
     """
     edges = list()
@@ -233,6 +252,24 @@ def edge_coord_in_direction(tile_id, direction):
         if tile_edge_offset_to_direction(edge_coord - tile_coord) == direction:
             return edge_coord
     raise ValueError('No edge found in direction={} at tile_id={}'.format(
+        direction,
+        tile_id
+    ))
+
+
+def node_coord_in_direction(tile_id, direction):
+    """
+    Returns the node coordinate in the given direction at the given tile identifier.
+
+    :param tile_id: tile identifier, int
+    :param direction: direction, str
+    :return: node coord, int
+    """
+    tile_coord = tile_id_to_coord(tile_id)
+    for node_coord in nodes_touching_tile(tile_id):
+        if tile_node_offset_to_direction(node_coord - tile_coord) == direction:
+            return node_coord
+    raise ValueError('No node found in direction={} at tile_id={}'.format(
         direction,
         tile_id
     ))
